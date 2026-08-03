@@ -15,10 +15,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleHistoryBtn = document.getElementById('toggle-history-btn');
     const historyList = document.getElementById('history-list');
     
+    const weightForm = document.getElementById('weight-form');
+    const weightInput = document.getElementById('weight-input');
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    
+    // 預設食物資料庫
+    const foodDatabase = [
+        { name: '白飯 (1碗)', calories: 280 },
+        { name: '糙米飯 (1碗)', calories: 215 },
+        { name: '麵條 (1碗)', calories: 285 },
+        { name: '吐司 (1片)', calories: 140 },
+        { name: '燕麥片 (50g)', calories: 195 },
+        { name: '雞胸肉 (100g)', calories: 165 },
+        { name: '水煮蛋 (1顆)', calories: 75 },
+        { name: '荷包蛋 (1顆)', calories: 120 },
+        { name: '鮭魚 (100g)', calories: 200 },
+        { name: '豆腐 (半盒)', calories: 75 },
+        { name: '高麗菜 (1盤)', calories: 65 },
+        { name: '花椰菜 (1盤)', calories: 50 },
+        { name: '香蕉 (1根)', calories: 89 },
+        { name: '蘋果 (1顆)', calories: 52 },
+        { name: '芭樂 (1顆)', calories: 150 },
+        { name: '拿鐵 (1杯)', calories: 120 },
+        { name: '美式咖啡 (1杯)', calories: 15 },
+        { name: '珍珠奶茶 (1杯)', calories: 550 },
+        { name: '便當 (平均)', calories: 800 },
+        { name: '漢堡 (1個)', calories: 450 },
+        { name: '披薩 (1片)', calories: 285 },
+        { name: '薯條 (中薯)', calories: 330 },
+        { name: '巧克力 (一片)', calories: 150 },
+        { name: '鮮奶 (240ml)', calories: 150 }
+    ];
+
     // Load from Local Storage
     let goalCalories = parseInt(localStorage.getItem('calorie_goal')) || 2000;
     let foods = JSON.parse(localStorage.getItem('calorie_foods')) || [];
     let history = JSON.parse(localStorage.getItem('calorie_history')) || {};
+    let weightHistory = JSON.parse(localStorage.getItem('weight_history')) || {};
+    let weightChartInstance = null;
 
     goalCaloriesEl.textContent = goalCalories;
 
@@ -41,6 +75,125 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('calorie_date', todayStr);
     }
 
+    // --- 自動選字清單 (Autocomplete) ---
+    const autocompleteList = document.getElementById('autocomplete-list');
+    
+    foodNameInput.addEventListener('input', function() {
+        const val = this.value.trim().toLowerCase();
+        autocompleteList.innerHTML = '';
+        if (!val) {
+            autocompleteList.style.display = 'none';
+            return;
+        }
+        
+        const matches = foodDatabase.filter(f => f.name.toLowerCase().includes(val));
+        
+        if (matches.length > 0) {
+            autocompleteList.style.display = 'block';
+            matches.forEach(match => {
+                const li = document.createElement('li');
+                li.className = 'autocomplete-item';
+                li.innerHTML = `<span class="ac-name">${match.name}</span><span class="ac-cal">${match.calories} 大卡</span>`;
+                li.addEventListener('click', () => {
+                    foodNameInput.value = match.name;
+                    foodCaloriesInput.value = match.calories;
+                    autocompleteList.style.display = 'none';
+                });
+                autocompleteList.appendChild(li);
+            });
+        } else {
+            autocompleteList.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target !== foodNameInput && e.target !== autocompleteList) {
+            autocompleteList.style.display = 'none';
+        }
+    });
+
+    // --- 體重圖表 (Chart.js) ---
+    function renderWeightChart() {
+        const dates = Object.keys(weightHistory).sort();
+        const weights = dates.map(date => weightHistory[date]);
+
+        // 預設如果沒資料，給些空資料讓圖表出來
+        const displayDates = dates.length > 0 ? dates : ['暫無資料'];
+        const displayWeights = weights.length > 0 ? weights : [null];
+
+        if (weightChartInstance) {
+            weightChartInstance.destroy();
+        }
+
+        weightChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: displayDates,
+                datasets: [{
+                    label: '體重 (kg)',
+                    data: displayWeights,
+                    borderColor: '#00cec9',
+                    backgroundColor: 'rgba(0, 206, 201, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#6C5CE7',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#00cec9',
+                        padding: 10,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8', maxTicksLimit: 5 }
+                    }
+                }
+            }
+        });
+    }
+
+    weightForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const weight = parseFloat(weightInput.value);
+        if (weight > 0) {
+            weightHistory[todayStr] = weight;
+            localStorage.setItem('weight_history', JSON.stringify(weightHistory));
+            renderWeightChart();
+            weightInput.value = '';
+            
+            // 提示動畫
+            const btn = weightForm.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = '已記錄 ✓';
+            btn.style.background = 'var(--success)';
+            btn.style.color = '#000';
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        }
+    });
+
+    // --- 歷史紀錄 (History) ---
     function renderHistory() {
         historyList.innerHTML = '';
         const dates = Object.keys(history).sort().reverse();
@@ -73,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 主 UI 更新 ---
     function updateUI() {
         foodList.innerHTML = '';
         let totalConsumed = 0;
@@ -190,4 +344,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化渲染
     updateUI();
+    renderWeightChart();
 });

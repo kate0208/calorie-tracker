@@ -65,12 +65,6 @@ header h1 {
     margin-bottom: 0.35rem;
 }
 
-.subtitle {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-}
-
 /* Dashboard & Circle */
 .dashboard {
     display: flex;
@@ -207,6 +201,53 @@ input:focus {
     background: rgba(0, 0, 0, 0.3);
 }
 
+/* Autocomplete */
+.autocomplete-container {
+    position: relative;
+}
+
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    list-style: none;
+    z-index: 100;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    display: none;
+}
+
+.autocomplete-item {
+    padding: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background: rgba(108, 92, 231, 0.2);
+}
+
+.ac-name {
+    font-weight: 500;
+}
+.ac-cal {
+    color: var(--secondary);
+    font-size: 0.9rem;
+}
+
 .btn-primary {
     width: 100%;
     padding: 1.2rem;
@@ -260,10 +301,6 @@ input:focus {
 .food-list::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
-}
-
-.food-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
 }
 
 .food-item {
@@ -338,6 +375,48 @@ input:focus {
 .btn-text:hover {
     color: var(--danger);
     background: rgba(255, 118, 117, 0.1);
+}
+
+/* Weight Section */
+.weight-section {
+    flex: 1;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.5rem;
+}
+
+.weight-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.weight-form input {
+    flex: 1;
+    margin: 0;
+}
+
+.btn-secondary {
+    padding: 0 1.5rem;
+    border: none;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.chart-container {
+    width: 100%;
+    height: 220px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 1rem;
 }
 
 /* History List */

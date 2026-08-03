@@ -11,6 +11,8 @@
     <link rel="icon" href="icon.jpg">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Weight tracking -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -41,8 +43,9 @@
         <section class="add-food">
             <h2>新增紀錄</h2>
             <form id="food-form">
-                <div class="input-group">
-                    <input type="text" id="food-name" placeholder="食物名稱 (例: 蘋果)" required autocomplete="off">
+                <div class="input-group autocomplete-container">
+                    <input type="text" id="food-name" placeholder="搜尋或輸入食物名稱" required autocomplete="off">
+                    <ul id="autocomplete-list" class="autocomplete-list"></ul>
                 </div>
                 <div class="input-group">
                     <input type="number" id="food-calories" placeholder="熱量 (大卡)" required min="1">
@@ -58,6 +61,17 @@
             <ul class="food-list" id="food-list">
                 <!-- Food items will be dynamically injected here via JS -->
             </ul>
+        </section>
+        
+        <section class="weight-section">
+            <h2>體重追蹤</h2>
+            <form id="weight-form" class="weight-form">
+                <input type="number" step="0.1" id="weight-input" placeholder="輸入今日體重 (kg)" required>
+                <button type="submit" class="btn-secondary">記錄</button>
+            </form>
+            <div class="chart-container">
+                <canvas id="weightChart"></canvas>
+            </div>
         </section>
 
         <section class="history-section">

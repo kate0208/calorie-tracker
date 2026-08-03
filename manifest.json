@@ -1,0 +1,16 @@
+{
+  "name": "熱量追蹤",
+  "short_name": "熱量追蹤",
+  "description": "Kate 的專屬每日熱量計算機",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#6C5CE7",
+  "icons": [
+    {
+      "src": "./icon.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg"
+    }
+  ]
+}

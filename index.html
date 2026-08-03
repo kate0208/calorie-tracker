@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日熱量計算機 | Kate's Calorie Tracker</title>
+    <meta name="description" content="一個專為 Kate 設計的每日熱量計算機，幫助您輕鬆追蹤飲食與卡路里目標。">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>熱量追蹤</h1>
+            <p class="subtitle">Kate 的專屬健康助手 🥑</p>
+        </header>
+
+        <section class="dashboard">
+            <div class="progress-circle" id="progress-circle">
+                <div class="progress-content">
+                    <span id="remaining-calories">2000</span>
+                    <span class="label">剩餘大卡</span>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-label">每日目標</span>
+                    <span class="stat-value" id="goal-calories">2000</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">今日已攝取</span>
+                    <span class="stat-value highlight" id="consumed-calories">0</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="add-food">
+            <h2>新增紀錄</h2>
+            <form id="food-form">
+                <div class="input-group">
+                    <input type="text" id="food-name" placeholder="食物名稱 (例: 蘋果)" required autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <input type="number" id="food-calories" placeholder="熱量 (大卡)" required min="1">
+                </div>
+                <button type="submit" class="btn-primary">
+                    <span>+</span> 新增至紀錄
+                </button>
+            </form>
+        </section>
+
+        <section class="food-list-section">
+            <h2>今日飲食紀錄 <button id="clear-btn" class="btn-text">清空</button></h2>
+            <ul class="food-list" id="food-list">
+                <!-- Food items will be dynamically injected here via JS -->
+            </ul>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

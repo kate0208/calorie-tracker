@@ -132,11 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: '體重 (kg)',
                     data: displayWeights,
-                    borderColor: '#00cec9',
-                    backgroundColor: 'rgba(0, 206, 201, 0.1)',
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     borderWidth: 3,
-                    pointBackgroundColor: '#6C5CE7',
-                    pointBorderColor: '#fff',
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#10b981',
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     fill: true,
@@ -149,21 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
                         titleColor: '#fff',
-                        bodyColor: '#00cec9',
+                        bodyColor: '#10b981',
                         padding: 10,
                         displayColors: false
                     }
                 },
                 scales: {
                     y: {
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#94a3b8' }
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: { color: '#64748b' }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#94a3b8', maxTicksLimit: 5 }
+                        ticks: { color: '#64748b', maxTicksLimit: 5 }
                     }
                 }
             }
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 更新進度條與顏色
         const percentage = Math.min((totalConsumed / goalCalories) * 100, 100);
-        let color = 'var(--secondary)'; // 正常
+        let color = 'var(--primary)'; // 正常 (綠色)
         
         if (percentage > 100) {
             color = 'var(--danger)'; // 超標
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelector('.progress-content .label').textContent = '剩餘大卡';
         }
 
-        progressCircle.style.background = `conic-gradient(${color} ${percentage * 3.6}deg, rgba(255,255,255,0.05) 0deg)`;
+        progressCircle.style.background = `conic-gradient(${color} ${percentage * 3.6}deg, #f1f5f9 0deg)`;
 
         // 儲存到 Local Storage
         localStorage.setItem('calorie_foods', JSON.stringify(foods));

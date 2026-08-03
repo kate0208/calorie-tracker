@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const foodForm = document.getElementById('food-form');
     const foodNameInput = document.getElementById('food-name');
+    const foodAmountInput = document.getElementById('food-amount');
     const foodCaloriesInput = document.getElementById('food-calories');
     const foodList = document.getElementById('food-list');
     
@@ -19,32 +20,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const weightInput = document.getElementById('weight-input');
     const ctx = document.getElementById('weightChart').getContext('2d');
     
-    // 預設食物資料庫
+    // 精確食物資料庫 (以每 100g/ml 計算)
     const foodDatabase = [
-        { name: '白飯 (1碗)', calories: 280 },
-        { name: '糙米飯 (1碗)', calories: 215 },
-        { name: '麵條 (1碗)', calories: 285 },
-        { name: '吐司 (1片)', calories: 140 },
-        { name: '燕麥片 (50g)', calories: 195 },
-        { name: '雞胸肉 (100g)', calories: 165 },
-        { name: '水煮蛋 (1顆)', calories: 75 },
-        { name: '荷包蛋 (1顆)', calories: 120 },
-        { name: '鮭魚 (100g)', calories: 200 },
-        { name: '豆腐 (半盒)', calories: 75 },
-        { name: '高麗菜 (1盤)', calories: 65 },
-        { name: '花椰菜 (1盤)', calories: 50 },
-        { name: '香蕉 (1根)', calories: 89 },
-        { name: '蘋果 (1顆)', calories: 52 },
-        { name: '芭樂 (1顆)', calories: 150 },
-        { name: '拿鐵 (1杯)', calories: 120 },
-        { name: '美式咖啡 (1杯)', calories: 15 },
-        { name: '珍珠奶茶 (1杯)', calories: 550 },
-        { name: '便當 (平均)', calories: 800 },
-        { name: '漢堡 (1個)', calories: 450 },
-        { name: '披薩 (1片)', calories: 285 },
-        { name: '薯條 (中薯)', calories: 330 },
-        { name: '巧克力 (一片)', calories: 150 },
-        { name: '鮮奶 (240ml)', calories: 150 }
+        { name: '白飯', calPer100g: 183 },
+        { name: '糙米飯', calPer100g: 111 },
+        { name: '麵條 (熟)', calPer100g: 138 },
+        { name: '白吐司', calPer100g: 290 },
+        { name: '燕麥片', calPer100g: 389 },
+        { name: '雞胸肉 (生)', calPer100g: 104 },
+        { name: '水煮蛋', calPer100g: 155 },
+        { name: '煎荷包蛋', calPer100g: 196 },
+        { name: '鮭魚 (生)', calPer100g: 208 },
+        { name: '板豆腐', calPer100g: 88 },
+        { name: '高麗菜', calPer100g: 25 },
+        { name: '花椰菜', calPer100g: 34 },
+        { name: '香蕉', calPer100g: 89 },
+        { name: '蘋果', calPer100g: 52 },
+        { name: '芭樂', calPer100g: 38 },
+        { name: '全脂鮮奶', calPer100g: 63 },
+        { name: '無糖豆漿', calPer100g: 35 },
+        { name: '拿鐵 (無糖)', calPer100g: 45 },
+        { name: '美式咖啡', calPer100g: 2 },
+        { name: '無糖綠茶', calPer100g: 0 },
+        { name: '薯條 (油炸)', calPer100g: 311 },
+        { name: '黑巧克力', calPer100g: 546 },
+        { name: '原味優格', calPer100g: 61 }
     ];
 
     // Load from Local Storage
@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let history = JSON.parse(localStorage.getItem('calorie_history')) || {};
     let weightHistory = JSON.parse(localStorage.getItem('weight_history')) || {};
     let weightChartInstance = null;
+    let selectedFoodCalPer100g = 0; // 用於自動計算
 
     goalCaloriesEl.textContent = goalCalories;
 
@@ -67,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const todayStr = getTodayString();
     
     if (lastSavedDate && lastSavedDate !== todayStr) {
-        // 如果是新的一天，清空昨天的紀錄 (昨天的總和已經在 history 中)
         foods = [];
         localStorage.setItem('calorie_date', todayStr);
         localStorage.setItem('calorie_foods', JSON.stringify(foods));
@@ -75,11 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('calorie_date', todayStr);
     }
 
-    // --- 自動選字清單 (Autocomplete) ---
+    // --- 自動選字清單與精確計算 (Autocomplete) ---
     const autocompleteList = document.getElementById('autocomplete-list');
     
     foodNameInput.addEventListener('input', function() {
         const val = this.value.trim().toLowerCase();
+        selectedFoodCalPer100g = 0; // 如果手動修改名稱，重置自動計算
         autocompleteList.innerHTML = '';
         if (!val) {
             autocompleteList.style.display = 'none';
@@ -93,10 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
             matches.forEach(match => {
                 const li = document.createElement('li');
                 li.className = 'autocomplete-item';
-                li.innerHTML = `<span class="ac-name">${match.name}</span><span class="ac-cal">${match.calories} 大卡</span>`;
+                li.innerHTML = `<span class="ac-name">${match.name}</span><span class="ac-cal">${match.calPer100g} 大卡 / 100g</span>`;
                 li.addEventListener('click', () => {
                     foodNameInput.value = match.name;
-                    foodCaloriesInput.value = match.calories;
+                    selectedFoodCalPer100g = match.calPer100g;
+                    
+                    // 自動計算目前的份量對應的熱量
+                    const amount = parseFloat(foodAmountInput.value) || 100;
+                    foodCaloriesInput.value = Math.round((amount / 100) * selectedFoodCalPer100g);
+                    
                     autocompleteList.style.display = 'none';
                 });
                 autocompleteList.appendChild(li);
@@ -112,12 +118,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 當份量改變時，自動計算熱量
+    foodAmountInput.addEventListener('input', () => {
+        if (selectedFoodCalPer100g > 0) {
+            const amount = parseFloat(foodAmountInput.value) || 0;
+            foodCaloriesInput.value = Math.round((amount / 100) * selectedFoodCalPer100g);
+        }
+    });
+
+    // 當熱量手動被改變時，移除自動計算綁定
+    foodCaloriesInput.addEventListener('input', () => {
+        selectedFoodCalPer100g = 0; 
+    });
+
+
     // --- 體重圖表 (Chart.js) ---
     function renderWeightChart() {
         const dates = Object.keys(weightHistory).sort();
         const weights = dates.map(date => weightHistory[date]);
 
-        // 預設如果沒資料，給些空資料讓圖表出來
         const displayDates = dates.length > 0 ? dates : ['暫無資料'];
         const displayWeights = weights.length > 0 ? weights : [null];
 
@@ -179,12 +198,11 @@ document.addEventListener('DOMContentLoaded', () => {
             renderWeightChart();
             weightInput.value = '';
             
-            // 提示動畫
             const btn = weightForm.querySelector('button');
             const originalText = btn.textContent;
             btn.textContent = '已記錄 ✓';
             btn.style.background = 'var(--success)';
-            btn.style.color = '#000';
+            btn.style.color = '#fff';
             setTimeout(() => {
                 btn.textContent = originalText;
                 btn.style.background = '';
@@ -198,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
         historyList.innerHTML = '';
         const dates = Object.keys(history).sort().reverse();
         
-        // 過濾掉今天，只顯示過去的紀錄（最多30天）
         const pastDates = dates.filter(date => date !== todayStr).slice(0, 30);
 
         if (pastDates.length === 0) {
@@ -236,9 +253,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const li = document.createElement('li');
             li.className = 'food-item';
+            // 如果有份量就顯示，否則不顯示
+            const amountStr = food.amount ? ` (${food.amount}g)` : '';
             li.innerHTML = `
                 <div class="food-info">
-                    <span class="food-name">${food.name}</span>
+                    <span class="food-name">${food.name}${amountStr}</span>
                     <span class="food-cal">${food.calories} 大卡</span>
                 </div>
                 <button class="delete-btn" onclick="deleteFood(${index})" aria-label="刪除紀錄">
@@ -253,21 +272,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const remaining = goalCalories - totalConsumed;
         
-        // 更新歷史紀錄中的「今天」，以便隔天保留
         history[todayStr] = { consumed: totalConsumed, goal: goalCalories };
         localStorage.setItem('calorie_history', JSON.stringify(history));
         
-        // 動態數字更新
         consumedCaloriesEl.textContent = totalConsumed;
         
-        // 更新進度條與顏色
         const percentage = Math.min((totalConsumed / goalCalories) * 100, 100);
-        let color = 'var(--primary)'; // 正常 (綠色)
+        let color = 'var(--primary)'; 
         
         if (percentage > 100) {
-            color = 'var(--danger)'; // 超標
+            color = 'var(--danger)'; 
         } else if (percentage > 85) {
-            color = 'var(--warning)'; // 警告
+            color = 'var(--warning)'; 
         }
         
         if (remaining < 0) {
@@ -282,11 +298,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         progressCircle.style.background = `conic-gradient(${color} ${percentage * 3.6}deg, #f1f5f9 0deg)`;
 
-        // 儲存到 Local Storage
         localStorage.setItem('calorie_foods', JSON.stringify(foods));
         localStorage.setItem('calorie_goal', goalCalories);
         
-        // 重新渲染歷史清單
         renderHistory();
     }
 
@@ -305,12 +319,15 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         
         const name = foodNameInput.value.trim();
+        const amount = parseFloat(foodAmountInput.value) || 0;
         const calories = parseInt(foodCaloriesInput.value.trim());
 
         if (name && calories) {
-            foods.unshift({ name, calories, id: Date.now() });
+            foods.unshift({ name, amount, calories, id: Date.now() });
             foodNameInput.value = '';
+            foodAmountInput.value = '100'; // Reset to default 100
             foodCaloriesInput.value = '';
+            selectedFoodCalPer100g = 0;
             foodNameInput.focus();
             updateUI();
         }

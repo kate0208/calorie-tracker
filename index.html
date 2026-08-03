@@ -47,7 +47,8 @@
                     <input type="text" id="food-name" placeholder="搜尋或輸入食物名稱" required autocomplete="off">
                     <ul id="autocomplete-list" class="autocomplete-list"></ul>
                 </div>
-                <div class="input-group">
+                <div class="input-group" style="display: flex; gap: 1rem;">
+                    <input type="number" id="food-amount" placeholder="份量 (g/ml)" required min="1" value="100">
                     <input type="number" id="food-calories" placeholder="熱量 (大卡)" required min="1">
                 </div>
                 <button type="submit" class="btn-primary">
